@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - gradual-k8s-rollout
 
 jobs:
   deploy:
