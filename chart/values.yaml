@@ -1,0 +1,18 @@
+apps:
+  - name: rev-proxy
+    environment: production
+    codebase: rev-proxy
+    replicaCount: 1
+    container:
+      image:
+        repository: osuakatsuki/rev-proxy
+        tag: latest
+      port: 80
+      imagePullSecrets:
+        - name: osuakatsuki-registry-secret
+        # - name: registry-akatsuki
+    service:
+      name: http
+      type: NodePort
+      port: 80
+      nodePort: 30000
