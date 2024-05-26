@@ -2,8 +2,7 @@ name: production-deploy
 on:
   push:
     branches:
-      - main
-      - gradual-k8s-rollout
+      - ovh-rev-proxy
 
 jobs:
   deploy:
