@@ -16,13 +16,13 @@ jobs:
       - name: Run deploy on production
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ secrets.NEW_SSH_HOST }}
+          username: ${{ secrets.NEW_SSH_USERNAME }}
+          key: ${{ secrets.NEW_SSH_KEY }}
+          port: ${{ secrets.NEW_SSH_PORT }}
           script_stop: true
           script: |
-            cd /home/akatsuki/nginx-conf
+            cd /home/programming/nginx-conf
             git fetch origin
             git checkout origin/${{ steps.extract_branch.outputs.branch }}
             git pull origin ${{ steps.extract_branch.outputs.branch }}
