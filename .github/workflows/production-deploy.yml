@@ -2,7 +2,7 @@ name: production-deploy
 on:
   push:
     branches:
-      - public-rev-proxy
+      - new-public-rev-proxy
 
 jobs:
   deploy:
