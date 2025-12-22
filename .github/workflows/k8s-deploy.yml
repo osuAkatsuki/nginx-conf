@@ -43,15 +43,15 @@ jobs:
 
       - name: Get kubeconfig from github secrets
         run: |
-            mkdir -p $HOME/.kube
-            echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-            sudo chown $(id -u):$(id -g) $HOME/.kube/config
-            chmod 700 $HOME/.kube/config
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          sudo chown $(id -u):$(id -g) $HOME/.kube/config
+          chmod 700 $HOME/.kube/config
 
       - name: Install helm
         uses: azure/setup-helm@v3
         with:
-          version: "latest"
+          version: "v3.19.2"
           token: ${{ secrets.GITHUB_TOKEN }}
         id: install
 
