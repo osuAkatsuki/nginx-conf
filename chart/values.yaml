@@ -8,9 +8,23 @@ apps:
         repository: osuakatsuki/rev-proxy
         tag: latest
       port: 80
+      readinessProbe:
+        tcpSocket:
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 2
+        successThreshold: 1
+        failureThreshold: 3
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
       imagePullSecrets:
         - name: osuakatsuki-registry-secret
-        # - name: registry-akatsuki
     service:
       name: http
       type: NodePort
