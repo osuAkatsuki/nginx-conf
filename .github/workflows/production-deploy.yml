@@ -14,23 +14,18 @@ jobs:
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
       - name: Run deploy on production
-        shell: bash
-        env:
-          SSH_HOST: ${{ secrets.NEW_SSH_HOST }}
-          SSH_USERNAME: ${{ secrets.NEW_SSH_USERNAME }}
-          SSH_KEY: ${{ secrets.NEW_SSH_KEY }}
-          SSH_PORT: ${{ secrets.NEW_SSH_PORT }}
-          BRANCH: ${{ steps.extract_branch.outputs.branch }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USERNAME@$SSH_HOST" bash -s <<'REMOTE_SCRIPT'
-            set -e
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.NEW_SSH_HOST }}
+          username: ${{ secrets.NEW_SSH_USERNAME }}
+          key: ${{ secrets.NEW_SSH_KEY }}
+          port: ${{ secrets.NEW_SSH_PORT }}
+          script_stop: true
+          script: |
             cd /home/programming/nginx-conf
             git fetch origin
-            git checkout "origin/$BRANCH"
-            git pull origin "$BRANCH"
+            git checkout origin/${{ steps.extract_branch.outputs.branch }}
+            git pull origin ${{ steps.extract_branch.outputs.branch }}
             rm -rf /etc/nginx/sites-enabled
             if [ -d sites-enabled ]; then
               cp -rT sites-enabled/ /etc/nginx/sites-enabled/
@@ -45,5 +40,3 @@ jobs:
             fi
             nginx -t
             sudo nginx -s reload
-          REMOTE_SCRIPT
-          rm -f ~/.ssh/deploy_key
