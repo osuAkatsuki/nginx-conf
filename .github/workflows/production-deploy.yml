@@ -1,42 +1,32 @@
 name: production-deploy
+
 on:
   push:
     branches:
       - public-rev-proxy
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy
-    runs-on: [self-hosted, vpc]
+    runs-on: ubuntu-latest
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
-      - name: Run deploy on production
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Deploy nginx config to production
+        uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.NEW_SSH_HOST }}
-          username: ${{ secrets.NEW_SSH_USERNAME }}
-          key: ${{ secrets.NEW_SSH_KEY }}
-          port: ${{ secrets.NEW_SSH_PORT }}
-          script_stop: true
+          host: ${{ secrets.SERVER_HOST }}
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/programming/nginx-conf
-            git fetch origin
-            git checkout origin/${{ steps.extract_branch.outputs.branch }}
-            git pull origin ${{ steps.extract_branch.outputs.branch }}
-            rm -rf /etc/nginx/sites-enabled
-            if [ -d sites-enabled ]; then
-              cp -rT sites-enabled/ /etc/nginx/sites-enabled/
-            fi
-            rm -rf /etc/nginx/sites-available
-            if [ -d sites-available ]; then
-              cp -rT sites-available/ /etc/nginx/sites-available/
-            fi
-            rm /etc/nginx/nginx.conf
-            if [ -f nginx.conf ]; then
-              cp nginx.conf /etc/nginx/nginx.conf
-            fi
+            cd /opt/akatsuki/hetzner-infra
+            git fetch origin main
+            git checkout origin/main
+
+            cp config/nginx/nginx.conf /etc/nginx/nginx.conf
+            cp config/nginx/sites-enabled/*.conf /etc/nginx/sites-enabled/
+
             nginx -t
-            sudo nginx -s reload
+            systemctl reload nginx
